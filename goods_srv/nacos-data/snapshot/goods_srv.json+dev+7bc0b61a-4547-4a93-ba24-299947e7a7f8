@@ -1,13 +1,13 @@
 {
-    "name": "user_srv",
+    "name": "goods_srv",
     "host": "127.0.0.1",
-    "tags": ["user_srv", "python-grpc", "srv"],
+    "tags": ["goods_srv", "python-grpc", "srv"],
     "mysql": {
         "host": "127.0.0.1",
         "port": 3306,
         "user": "root",
         "password": "topsky",
-        "db": "python_user_srv"
+        "db": "python_goods_srv"
     },
     "consul": {
         "host": "127.0.0.1",

@@ -61,13 +61,15 @@
   + 检查密码
   + user_srv依赖包安装：
   ``` shell
-  pip install - requirement.txt -i https://pypi.douban.com/simple
+  pip install -r requirement.txt -i https://pypi.douban.com/simple
   ```
 
 2 生成proto的python文件
   + python -m grpc_tools.protoc --python_out=. --grpc_python_out=. -I. user.proto
   
-3 nacos配置服务中心: user_srv.json 配置信息如下
+3 grpc consul服务注册和注销、服务注册健康检查
+
+4 nacos配置服务中心: user_srv.json 配置信息如下
 ```json
 {
     "name": "user_srv",
@@ -79,6 +81,44 @@
         "user": "root",
         "password": "123456",
         "db": "python_user_srv"
+    },
+    "consul": {
+        "host": "127.0.0.1",
+        "port": 8500
+    }
+}
+```
+
+##### 三、商品微服务（goods_srv）：  
+1 商品服务 
+  + 商品模块(商品列表、批量获取商品信息、商品增/删/查/改)
+  + 商品分类（获取所有的分类）
+  + 商品子分类（获取子分类列表信息、新建、删除、修改分类信息）
+  + 商品品牌
+  + 商品轮播图（获取轮播图列表信息、添加、删除、修改轮播图）
+  + 品牌分类
+  + 通过分类获取品牌
+  ``` shell
+  pip install -r requirement.txt -i https://pypi.douban.com/simple
+  ```
+
+2 生成proto的python文件
+  + python -m grpc_tools.protoc --python_out=. --grpc_python_out=. -I. goods.proto
+  
+3 grpc consul服务注册和注销、服务注册健康检查
+
+4 nacos配置服务中心: user_srv.json 配置信息如下
+```json
+{
+    "name": "goods_srv",
+    "host": "127.0.0.1",
+    "tags": ["goods_srv", "python-grpc", "srv"],
+    "mysql": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "user": "root",
+        "password": "123456",
+        "db": "python_goods_srv"
     },
     "consul": {
         "host": "127.0.0.1",

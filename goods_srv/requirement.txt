@@ -1,0 +1,9 @@
+peewee
+pymysql
+passlib
+loguru
+grpcio==1.32.0
+grpcio-tools==1.32.0
+protobuf==3.20.3
+python-consul2
+redis==3.5.3
