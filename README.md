@@ -8,6 +8,7 @@
   + 技术栈 python、orm、protobuf/grpc、consul、py_redis_lock、nacos、docker
   + 数据库：mysql8、redis5.0
   + 消息中间件：rocketmq
+  + 技术框架流程图：https://www.processon.com/view/link/632e7d427d9c081f94ea4c3e
 
 1.2 代码git clone
   + git clone仓库代码：git clone git@github.com:xiehuihuang/python_mall_srvs.git
