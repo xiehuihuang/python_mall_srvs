@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # @file: settings.py
-# @time: 2021-10-24 20:58
+# @time: 2021-10-30 22:14
 # @author: jack
 # @Email:793936517@qq.com
 # @desc:
 
-
 import json
 
+import redis
 import nacos
 from playhouse.pool import PooledMySQLDatabase
 from playhouse.shortcuts import ReconnectMixin
@@ -23,10 +23,10 @@ class ReconnectMysqlDatabase(ReconnectMixin, PooledMySQLDatabase):
 NACOS = {
     "Host": "127.0.0.1",
     "Port": 8848,
-    "NameSpace": "7bc0b61a-4547-4a93-ba24-299947e7a7f8",
+    "NameSpace": "ac7af6ba-ec53-4109-a8d1-06eba2959b00",
     "User": "nacos",
     "Password": "nacos",
-    "DataId": "goods_srv.json",
+    "DataId": "inventory_srv.json",
     "Group": "dev"
 }
 
@@ -51,6 +51,17 @@ CONSUL_PORT = data["consul"]["port"]
 # 服务相关的配置
 SERVICE_NAME = data["name"]
 SERVICE_TAGS = data["tags"]
+
+ROCKETMQ_HOST = data["rocketmq"]["host"]
+ROCKETMQ_PORT = data["rocketmq"]["port"]
+
+REDIS_HOST = data["redis"]["host"]
+REDIS_PORT = data["redis"]["port"]
+REDIS_DB = data["redis"]["db"]
+
+#配置一个连接池
+pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+REDIS_CLIENT = redis.StrictRedis(connection_pool=pool)
 
 DB = ReconnectMysqlDatabase(data["mysql"]["db"], host=data["mysql"]["host"], port=data["mysql"]["port"],
                             user=data["mysql"]["user"], password=data["mysql"]["password"])

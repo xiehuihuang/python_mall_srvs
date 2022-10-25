@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # @file: server.py
-# @time: 2021-10-24 20:57
+# @time: 2021-10-30 22:14
 # @author: jack
 # @Email:793936517@qq.com
 # @desc:
@@ -17,16 +17,17 @@ from functools import partial
 
 import grpc
 from loguru import logger
+from rocketmq.client import PushConsumer, ConsumeStatus
 
 BASE_DIR = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, BASE_DIR)
 
-from goods_srv.proto import goods_pb2, goods_pb2_grpc
-from goods_srv.handler.goods import GoodsServicer
+from inventory_srv.proto import inventory_pb2, inventory_pb2_grpc
+from inventory_srv.handler.inventory import InventoryServicer, reback_inv
 from common.grpc_health.v1 import health_pb2_grpc, health_pb2
 from common.grpc_health.v1 import health
 from common.register import consul
-from goods_srv.settings import settings
+from inventory_srv.settings import settings
 
 
 def on_exit(signo, frame, service_id):
@@ -37,6 +38,7 @@ def on_exit(signo, frame, service_id):
     sys.exit(0)
 
 
+# 通过proto生成的文件 可能无法被pycharm感知到， 所以有可能不能被及时的同步到linux中
 def get_free_tcp_port():
     tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tcp.bind(("", 0))
@@ -56,7 +58,7 @@ def serve():
     parser.add_argument('--port',
                         nargs="?",
                         type=int,
-                        default=50062,
+                        default=50063,
                         help="the listening port"
                         )
     args = parser.parse_args()
@@ -66,12 +68,12 @@ def serve():
     else:
         port = args.port
 
-    logger.add("logs/goods_srv_{time}.log")
+    logger.add("logs/inventory_srv_{time}.log")
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    # 注册商品服务
-    goods_pb2_grpc.add_GoodsServicer_to_server(GoodsServicer(), server)
+    # 注册库存服务
+    inventory_pb2_grpc.add_InventoryServicer_to_server(InventoryServicer(), server)
 
     # 注册健康检查
     health_pb2_grpc.add_HealthServicer_to_server(health.HealthServicer(), server)
@@ -101,7 +103,15 @@ def serve():
 
         sys.exit(0)
     logger.info(f"服务注册成功")
+
+    # 启动之后还得监听rocketmq的对应的topic进行库存归还
+    consumer = PushConsumer("mxshop_inventory")
+    consumer.set_name_server_address(f"{settings.ROCKETMQ_HOST}:{settings.ROCKETMQ_PORT}")
+    consumer.subscribe("order_reback", reback_inv)
+    consumer.start()
+
     server.wait_for_termination()
+    consumer.shutdown()
 
 
 if __name__ == '__main__':

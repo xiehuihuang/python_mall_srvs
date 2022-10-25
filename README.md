@@ -5,8 +5,9 @@
 1.1 项目开发工具及使用技术栈
   + python: 3.8.10
   + 开发工具：pyCharm2021.1.3
-  + 技术栈 python、orm、protobuf/grpc、consul、nacos、docker
+  + 技术栈 python、orm、protobuf/grpc、consul、py_redis_lock、nacos、docker
   + 数据库：mysql8、redis5.0
+  + 消息中间件：rocketmq
 
 1.2 代码git clone
   + git clone仓库代码：git clone git@github.com:xiehuihuang/python_mall_srvs.git
@@ -50,9 +51,26 @@
   > ```
   + 访问： http://127.0.0.1:8848/nacos
   + 登录：账号密码都是nacos
-  
+
+1.7 docker安装rocketmq
+  + 下载链接
+  > ```text
+  > 链接: https://pan.baidu.com/s/1SY2H1uHavxWrD71fkrLP-g 
+  > 提取码: bkng
+  > ```
+  + 把下载install.zip文件上传到linux服务器后解压
+  > ```shell
+  > 解压文件: unizip install.zip
+  > cd  install
+  > 启动安装rocketmq服务: docker-compose up
+  > ```
+1.8 在linux中搭建python的rocketmq环境
+> ```text
+> https://www.yuque.com/docs/share/c10864d7-efca-4723-b338-f489d8c07feb?#%20%E3%80%8A8.%E5%9C%A8linux%E4%B8%AD%E6%90%AD%E5%BB%BApython%E7%9A%84rocketmq%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E3%80%8B
+> ```
+
 ##### 二、用户微服务（user_srv）：  
-1 用户服务 
+1 用户微服务 
   + 用户列表
   + 添加用户
   + 更新用户
@@ -90,7 +108,7 @@
 ```
 
 ##### 三、商品微服务（goods_srv）：  
-1 商品服务 
+1 商品微服务 
   + 商品模块(商品列表、批量获取商品信息、商品增/删/查/改)
   + 商品分类（获取所有的分类）
   + 商品子分类（获取子分类列表信息、新建、删除、修改分类信息）
@@ -119,6 +137,51 @@
         "user": "root",
         "password": "123456",
         "db": "python_goods_srv"
+    },
+    "consul": {
+        "host": "127.0.0.1",
+        "port": 8500
+    }
+}
+```
+##### 四、库存微服务（inventory_srv）：  
+1 库存服务
+  + 设置库存
+  + 获取库存信息
+  + 扣减库存
+  + 库存归还
+  ``` shell
+  pip install -r requirement.txt -i https://pypi.douban.com/simple
+  ```
+  
+
+2 生成proto的python文件
+  + python -m grpc_tools.protoc --python_out=. --grpc_python_out=. -I. inventory.proto
+  
+3 grpc consul服务注册和注销、服务注册健康检查
+
+4 nacos配置服务中心: user_srv.json 配置信息如下
+```json
+{
+    "name": "inventory_srv",
+    "host": "127.0.0.1",
+    "tags": ["inventory_srv", "python-grpc", "srv"],
+    "mysql": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "user": "root",
+        "password": "123456",
+        "db": "python_inventory_srv"
+    },
+    "redis": {
+        "host":"127.0.0.1",
+        "port":6379,
+        "paaword": "topsky",
+        "db":0
+    },
+    "rocketmq":{
+        "host":"127.0.0.1",
+        "port":9876
     },
     "consul": {
         "host": "127.0.0.1",
